@@ -2,8 +2,10 @@ cmake_minimum_required(VERSION 3.4)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+option(BUILD_TESTS "Build tests" ON)
 option(BUILD_DOCS "Build documentation" OFF)
-option(BUILD_COVERAGE "Build coverage" OFF)
+option(BUILD_COVERAGE "Build code coverage" OFF)
 
 set(
         HUNTER_CACHE_SERVERS
@@ -14,8 +16,8 @@ set(
 include("cmake/HunterGate.cmake")
 
 HunterGate(
-        URL "https://github.com/cpp-pm/hunter/archive/v0.23.314.tar.gz"
-        SHA1 "95c47c92f68edb091b5d6d18924baabe02a6962a"
+        URL "https://github.com/cpp-pm/hunter/archive/v0.23.278.tar.gz"
+        SHA1 "35fa55bc1dfcf9f4d7264f8bb26cd1759ce1ae07"
 )
 
 project(builder)
@@ -58,3 +60,13 @@ target_link_libraries(
 enable_testing()
 add_test(NAME unit_tests COMMAND tests)
 target_link_libraries(main builder)
+
+if(BUILD_COVERAGE)
+    set(ENABLE_COVERAGE ON CACHE BOOL "Enable coverage build." FORCE)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tools/coverage/cmake")
+    find_package(codecov)
+    string(APPEND CMAKE_CXX_FLAGS " --coverage")
+    add_coverage(${PROJECT_NAME})
+    add_coverage(tests)
+    coverage_evaluate()
+endif()
